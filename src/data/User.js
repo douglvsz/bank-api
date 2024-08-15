@@ -1,7 +1,7 @@
 import { PrismaClient } from "@prisma/client";
 import CPF from "cpf-check"
 import validator from "validator";
-import bcrypt from 'bcrypt';
+import bcrypt, { compare } from 'bcrypt';
 import jwt from 'jsonwebtoken';
 
 const secrettoken = process.env.SECRET
@@ -77,6 +77,17 @@ class User{
         const findMail = await prisma.user.findUnique({where: {email: this.body.email}});
         if(findMail) return this.errors.push('Usuário já existe');
     };
+
+    async changePass(userId){
+        const find = await prisma.user.findUnique({where: {id: userId}});
+        const password = this.body.senha;
+        const compare = await bcrypt.compare(password, find.senha)
+        if(compare) return this.errors.push('A senha não pode ser igual a anterior');
+        const passHash = await bcrypt.hash(password, 10)
+        if(password.length < 3 || password.length > 15) return this.errors.push('A senha deve ser entre 3 e 15 caracteres');
+        await prisma.user.update({where: {id: userId}, data:{senha: passHash}})
+        return({message: 'Senha alterada com sucesso!', success: true})
+    }
 };
 
 export default User;

@@ -44,7 +44,14 @@ class Userctrl{
         const result = await pay.transfer(req.userId);
         if(pay.errors.length > 0) return res.json(pay.errors);
         res.json(result)
-    }
+    };
+
+    async changePass(req, res){
+        const change = new User(req.body);
+        const result = await change.changePass(req.userId);
+        if(change.errors.length > 0) return res.json(change.errors);
+        res.status(200).json(result)
+    };
 
 };
 
