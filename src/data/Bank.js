@@ -44,16 +44,16 @@ class Bank{
     };
 
     async consult(userId){
-        const find = await prisma.user.findUnique({where: {id: userId}, include: {transferEnviada: {include: {enviou: true}}, transferRecebida: {include: {recebeu: true}}}});
-        const pay = find.transferEnviada;
-        const payReceiver = find.transferRecebida
-        return({pay: pay, payReceiver: payReceiver})
-        // const saldo = find.saldo.toFixed(2)
-        // const paySend = find.transferEnviada
-        // const payReceiver = find.transferRecebida
+        const find = await prisma.user.findUnique({where: {id: userId}, include: {transferEnviada: {include: {enviou: true, recebeu:true}}, transferRecebida:{include: {enviou: true, recebeu: true}}}});
         
+        const paySend = find.transferEnviada;
+        const PayReceiver = find.transferRecebida
         
-        // return({message: `Olá, ${find.nome}`, saldo: saldo, success: true, paysend: paySend, payreceiver: payReceiver})
+        const enviadas = paySend.map(el => ({valor: el.valor, recebeu: el.recebeu.email}));
+        const recebidas = PayReceiver.map(el => ({valor: el.valor, enviou: el.enviou.email}));
+        
+        const saldo = find.saldo.toFixed(2)
+        return({message: `Olá, ${find.nome}`, saldo: saldo, success: true, transferência: {enviadas, recebidas}})
     };
 
 };
